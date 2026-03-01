@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ISL Recognition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-slate-900 to-slate-700 text-white min-h-screen flex flex-col items-center justify-center">
+
+<div class="flex gap-10 items-center">
+
+    <!-- Camera Feed -->
+    <div>
+        <img src="/video" class="rounded-2xl shadow-2xl w-[480px]">
+    </div>
+
+    <!-- Control Panel -->
+    <div class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-[420px]">
+
+        <h1 class="text-2xl font-bold mb-4 text-center">ISL Recognition</h1>
+
+        <!-- Live Prediction -->
+        <div class="text-center mb-4">
+            <div id="prediction" class="text-5xl font-bold text-green-400">--</div>
+            <div id="confidence" class="text-gray-300">Confidence: 0%</div>
+        </div>
+
+        <!-- Sentence Display -->
+        <div class="bg-black/40 p-3 rounded-lg mb-4 min-h-[60px]">
+            <div id="sentence" class="text-lg break-words"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <button onclick="appendLetter()" class="bg-green-500 hover:bg-green-600 py-2 rounded-lg">
+                ➕ Add Letter
+            </button>
+
+            <button onclick="addSpace()" class="bg-blue-500 hover:bg-blue-600 py-2 rounded-lg">
+                ␣ Space
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="clearSentence()" class="bg-red-500 hover:bg-red-600 py-2 rounded-lg">
+                🗑 Clear
+            </button>
+
+            <button onclick="speakSentence()" class="bg-purple-500 hover:bg-purple-600 py-2 rounded-lg">
+                🔊 Speak Sentence
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+let currentPrediction = "";
+
+function fetchPrediction() {
+    fetch("/prediction")
+        .then(res => res.json())
+        .then(data => {
+            currentPrediction = data.prediction;
+            document.getElementById("prediction").innerText = data.prediction;
+            document.getElementById("confidence").innerText =
+                "Confidence: " + data.confidence + "%";
+        });
+}
+
+function fetchSentence() {
+    fetch("/sentence")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("sentence").innerText = data.sentence;
+        });
+}
+
+function appendLetter() {
+    fetch("/append")
+        .then(() => fetchSentence());
+}
+
+function addSpace() {
+    fetch("/space")
+        .then(() => fetchSentence());
+}
+
+function clearSentence() {
+    fetch("/clear")
+        .then(() => fetchSentence());
+}
+
+function speakSentence() {
+    fetch("/sentence")
+        .then(res => res.json())
+        .then(data => {
+            if(data.sentence) {
+                let speech = new SpeechSynthesisUtterance(data.sentence);
+                speechSynthesis.speak(speech);
+            }
+        });
+}
+
+setInterval(fetchPrediction, 500);
+setInterval(fetchSentence, 1000);
+</script>
+
+</body>
+</html>

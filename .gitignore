@@ -1,0 +1,14 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Datasets (do not upload large files)
+dataset_raw/
+dataset_landmarks/
+
+# OS files
+.DS_Store
+Thumbs.db
